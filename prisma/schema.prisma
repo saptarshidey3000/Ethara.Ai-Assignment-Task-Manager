@@ -187,3 +187,25 @@ model Task {
 
   @@index([status])
 }
+
+model Comment {
+  id String @id @default(uuid())
+
+  content String
+
+  userId String
+
+  taskId String
+
+  /*
+  |--------------------------------------------------------------------------
+  | RELATIONS
+  |--------------------------------------------------------------------------
+  */
+
+  user User @relation(fields: [userId], references: [id])
+
+  task Task @relation(fields: [taskId], references: [id])
+
+  createdAt DateTime @default(now())
+}
