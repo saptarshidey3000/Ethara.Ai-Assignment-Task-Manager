@@ -209,3 +209,25 @@ model Comment {
 
   createdAt DateTime @default(now())
 }
+
+model ActivityLog {
+  id String @id @default(uuid())
+
+  action String
+
+  taskId String
+
+  performedById String
+
+  /*
+  |--------------------------------------------------------------------------
+  | RELATIONS
+  |--------------------------------------------------------------------------
+  */
+
+  task Task @relation(fields: [taskId], references: [id])
+
+  performedBy User @relation(fields: [performedById], references: [id])
+
+  createdAt DateTime @default(now())
+}
