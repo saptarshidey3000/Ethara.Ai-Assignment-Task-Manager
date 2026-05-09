@@ -107,3 +107,36 @@ model Project {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ProjectMember {
+  id String @id @default(uuid())
+
+  userId String
+
+  projectId String
+
+  role ProjectRole @default(PROJECT_MEMBER)
+
+  /*
+  |--------------------------------------------------------------------------
+  | RELATIONS
+  |--------------------------------------------------------------------------
+  */
+
+  user User @relation(fields: [userId], references: [id])
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  joinedAt DateTime @default(now())
+
+  /*
+  |--------------------------------------------------------------------------
+  | UNIQUE CONSTRAINT
+  |--------------------------------------------------------------------------
+  |
+  | Prevent duplicate membership
+  |
+  */
+
+  @@unique([userId, projectId])
+}
