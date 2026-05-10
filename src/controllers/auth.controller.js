@@ -33,6 +33,10 @@
 
 import prisma from "../db/index.js"
 import hashPassword from "../utils/hashPassword.js"
+import { generateAccessToken , generateRefreshToken } from "../utils/generateTokens.js"
+import jwt from "jsonwebtoken"
+import {cookieOptions} from "../utils/cookieOptions.js"
+
 
 //1.register user controller
 
@@ -70,11 +74,42 @@ const registerUser = async (req, res) => {
       password: hashedPassword
     }
   })
-  //response 
-  return res.status(201).json({
+  //6. Generate tokens
+  const accessToken = generateAccessToken(user.id)
+  const refreshToken = generateRefreshToken(user.id)
+  //7. Save refresh token
+  await prisma.refreshToken.create({
+    data: {
+      token: refreshToken,
+      userId: user.id
+    }
+  })
+//sanitize user object
+const sanitizedUser = {
+  id: user.id,
+  fullname: user.fullname,
+  username: user.username,
+  email: user.email
+}
+
+  //8. Send cookies
+  res.cookie(
+    "refreshToken",
+     refreshToken,
+    { 
+        httpOnly: true, 
+        secure: true 
+    })
+  //9. Return response
+  return res
+  .status(201)
+  .cookie("accessToken", accessToken, cookieOptions)
+  .cookie("refreshToken", refreshToken, cookieOptions)
+  .json({
     success: true,
     message: "User registered successfully",
-    user
+    user : sanitizedUser,
+    accessToken
   })
 }
 
