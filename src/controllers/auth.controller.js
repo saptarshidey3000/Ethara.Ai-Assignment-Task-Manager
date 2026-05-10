@@ -34,6 +34,7 @@
 import prisma from "../db/index.js"
 import hashPassword from "../utils/hashPassword.js"
 import { generateAccessToken , generateRefreshToken } from "../utils/generateTokens.js"
+import comparepassword from "../utils/comparePassword.js"
 import jwt from "jsonwebtoken"
 import {cookieOptions} from "../utils/cookieOptions.js"
 
@@ -111,9 +112,125 @@ const sanitizedUser = {
     user : sanitizedUser,
     accessToken
   })
+
 }
 
 //2.login user controller
+
+const loginUser = async (req, res) => {
+
+  /*
+  |--------------------------------------------------------------------------
+  | 1. Extract Input
+  |--------------------------------------------------------------------------
+  */
+
+  const { email, password } = req.body
+
+  /*
+  |--------------------------------------------------------------------------
+  | 2. Validate Input
+  |--------------------------------------------------------------------------
+  */
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required"
+    })
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | 3. Find User
+  |--------------------------------------------------------------------------
+  */
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email
+    }
+  })
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid credentials"
+    })
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | 4. Compare Password
+  |--------------------------------------------------------------------------
+  */
+
+  const isPasswordCorrect = await comparePassword(
+    password,
+    user.password
+  )
+
+  if (!isPasswordCorrect) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid credentials"
+    })
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | 5. Generate Tokens
+  |--------------------------------------------------------------------------
+  */
+
+  const accessToken = generateAccessToken(user.id)
+
+  const refreshToken = generateRefreshToken(user.id)
+
+  /*
+  |--------------------------------------------------------------------------
+  | 6. Save Refresh Token
+  |--------------------------------------------------------------------------
+  */
+
+  await prisma.user.update({
+    where: {
+      id: user.id
+    },
+    data: {
+      refreshToken
+    }
+  })
+
+  /*
+  |--------------------------------------------------------------------------
+  | 7. Sanitize Response
+  |--------------------------------------------------------------------------
+  */
+
+  const sanitizedUser = {
+    id: user.id,
+    fullname: user.fullname,
+    username: user.username,
+    email: user.email
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | 8. Send Response
+  |--------------------------------------------------------------------------
+  */
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json({
+      success: true,
+      message: "Login successful",
+      user: sanitizedUser
+    })
+}
 
 //3.logout user controller
 
@@ -123,5 +240,7 @@ const sanitizedUser = {
 
 
 export {
-  registerUser
+  registerUser,
+    loginUser,
+    
 }
