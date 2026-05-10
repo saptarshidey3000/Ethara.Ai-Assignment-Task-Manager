@@ -1,5 +1,19 @@
 /*
 |--------------------------------------------------------------------------
+| AUTH CONTROLLER
+|--------------------------------------------------------------------------
+|
+| Handles:
+| - Registration
+| - Login
+| - Logout
+| - Refresh Token
+| - Current User
+|
+*/
+
+/*
+|--------------------------------------------------------------------------
 | REGISTER USER
 |--------------------------------------------------------------------------
 |
@@ -16,4 +30,22 @@
 | 9. Return response
 |
 */
-//1. Extract input
+
+//1.register user controller
+
+const registerUser = async (req, res) => {
+    
+}
+
+//2.login user controller
+
+//3.logout user controller
+
+//4.refresh token controller
+
+//5.get current user controller
+
+
+export {
+  registerUser
+}
