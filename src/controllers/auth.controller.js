@@ -331,5 +331,6 @@ export {
   registerUser,
   loginUser,
   getCurrentUser,
-  refreshToken
+  refreshToken ,
+  logoutUser
 }
