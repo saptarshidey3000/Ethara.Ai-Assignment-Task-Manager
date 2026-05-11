@@ -237,10 +237,18 @@ const loginUser = async (req, res) => {
 //4.refresh token controller
 
 //5.get current user controller
+const getCurrentUser = async (req, res) => {
+
+  return res.status(200).json({
+    success: true,
+    user: req.user
+  })
+
+}
 
 
 export {
   registerUser,
-    loginUser,
-    
+  loginUser,
+  getCurrentUser
 }
