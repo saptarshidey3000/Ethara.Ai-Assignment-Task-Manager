@@ -235,6 +235,65 @@ const loginUser = async (req, res) => {
 //3.logout user controller
 
 //4.refresh token controller
+const refreshToken = async (req, res) => {
+  try {
+    //1. Read refresh token from cookie
+    const incomingRefreshToken = req.cookies?.refreshToken
+
+    if (!incomingRefreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token is required"
+      })
+    }
+
+    //2. Verify refresh token
+    const decoded = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    )
+
+    //3. Find user
+    const user = await prisma.user.findUnique({
+      where: {
+        id: decoded.userId
+      }
+    })
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid refresh token"
+      })
+    }
+    //verify stored refresh token matches incoming token
+    if (user.refreshToken !== incomingRefreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid refresh token"
+      })
+    }
+
+    //4. Generate new access token
+    const newAccessToken = generateAccessToken(user.id)
+
+    //5. Return response
+    return res
+    .status(200)
+    .cookie("accessToken", newAccessToken, cookieOptions)
+    .json({
+      success: true,
+      message: "Token refreshed successfully",
+      accessToken: newAccessToken
+    })
+
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid refresh token"
+    })
+  }
+}
 
 //5.get current user controller
 const getCurrentUser = async (req, res) => {
@@ -250,5 +309,6 @@ const getCurrentUser = async (req, res) => {
 export {
   registerUser,
   loginUser,
-  getCurrentUser
+  getCurrentUser,
+  refreshToken
 }
