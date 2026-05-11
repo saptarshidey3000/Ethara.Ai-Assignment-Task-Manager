@@ -36,7 +36,7 @@ import hashPassword from "../utils/hashPassword.js"
 import { generateAccessToken , generateRefreshToken } from "../utils/generateTokens.js"
 import comparepassword from "../utils/comparePassword.js"
 import jwt from "jsonwebtoken"
-import {cookieOptions} from "../utils/cookieOptions.js"
+import cookieOptions from "../constants/cookieOptions.js"
 
 
 //1.register user controller
@@ -233,6 +233,27 @@ const loginUser = async (req, res) => {
 }
 
 //3.logout user controller
+
+const logoutUser = async (req, res) => {
+  //remove refresh token from db
+  await prisma.user.update({
+    where: {
+      id: req.user.id
+    },
+    data: {
+      refreshToken: null
+    }
+  })
+  //clear cookies
+  return res 
+  .status(200)
+  .clearCookie("accessToken", cookieOptions)
+  .clearCookie("refreshToken", cookieOptions)
+  .json({
+    success: true,
+    message: "Logout successful"
+  })
+}
 
 //4.refresh token controller
 const refreshToken = async (req, res) => {
