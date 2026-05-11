@@ -28,7 +28,7 @@ const router = Router()
 
 router.post("/register", registerUser)
 
-router.post("/login", verifyJWT, loginUser)
+router.post("/login",  loginUser)
 
 router.post("/logout", verifyJWT ,logoutUser)
 

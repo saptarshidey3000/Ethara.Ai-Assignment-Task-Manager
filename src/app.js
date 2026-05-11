@@ -5,12 +5,19 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import errorHandler from "./middlewares/error.middleware.js";
-import healthRouter from "./routes/health.route.js";
+
+// routes
+import healthRouter from "./routes/health.routes.js";
+import authRouter from "./routes/auth.routes.js";
+import projectRouter from "./routes/project.routes.js";
 
 const app = express();
 
-
-// core middlewares
+/*
+|--------------------------------------------------------------------------
+| CORE MIDDLEWARES
+|--------------------------------------------------------------------------
+*/
 
 // enable CORS
 app.use(
@@ -20,14 +27,12 @@ app.use(
   })
 );
 
-
-// parse JSON data
+// parse JSON body
 app.use(
   express.json({
     limit: "16kb",
   })
 );
-
 
 // parse URL encoded data
 app.use(
@@ -37,20 +42,32 @@ app.use(
   })
 );
 
-
 // parse cookies
 app.use(cookieParser());
 
-// health check endpoint
+/*
+|--------------------------------------------------------------------------
+| ROUTES
+|--------------------------------------------------------------------------
+*/
+
+// health routes
 app.use("/api/v1/health", healthRouter);
 
-// routes
+// auth routes
+app.use("/api/v1/auth", authRouter);
 
-// health route
+// project routes
+app.use("/api/v1/projects", projectRouter);
 
-
-// global error middleware (always at the end)
+/*
+|--------------------------------------------------------------------------
+| GLOBAL ERROR HANDLER
+|--------------------------------------------------------------------------
+|
+| Must always stay LAST
+|
+*/
 app.use(errorHandler);
-
 
 export { app };
