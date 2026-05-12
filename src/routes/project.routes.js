@@ -1,25 +1,35 @@
-import {Router} from "express"
-//middlewares
-import {verifyJWT} from "../middlewares/auth.middleware.js"
-//controllers
-import { 
-    createProject,
-     getAllProjects,
-      getProjectById,
-       updateProject,
-        deleteProject } from "../controllers/project.controller.js"
+import { Router } from "express"
+
+// middlewares
+import { verifyJWT } from "../middlewares/auth.middleware.js"
+
+import {
+  verifyProjectAccess,
+} from "../middlewares/project.middleware.js"
+
+// controllers
+import {
+  createProject,
+  getAllProjects,
+  getProjectById,
+  updateProject,
+  deleteProject,
+  addMember,
+  removeMember,
+} from "../controllers/project.controller.js"
 
 const router = Router()
 
 /*
 |--------------------------------------------------------------------------
-| Project Routes
+| PROJECT ROUTES
 |--------------------------------------------------------------------------
 |
 | Base Route:
 | /api/v1/projects
 |
 */
+
 /*
 |--------------------------------------------------------------------------
 | Create Project
@@ -28,10 +38,14 @@ const router = Router()
 | POST /api/v1/projects/create
 |
 | Protected Route
-| Only logged in users can create projects
+| Only authenticated users can create projects
 |
 */
-router.post("/create", verifyJWT, createProject)
+router.post(
+  "/create",
+  verifyJWT,
+  createProject
+)
 
 /*
 |--------------------------------------------------------------------------
@@ -40,46 +54,47 @@ router.post("/create", verifyJWT, createProject)
 |
 | GET /api/v1/projects
 |
-| Returns all projects of logged in user
+| Returns all projects where logged in user
+| is a member
 |
 */
-
-router.get("/", verifyJWT, getAllProjects)
-/*
-|--------------------------------------------------------------------------
-| Get Single Project
-|--------------------------------------------------------------------------
-|
-| GET /api/v1/projects/:projectId
-|
-| Returns detailed project information
-|
-*/
-
-router.get("/:projectId", verifyJWT, getProjectById)
+router.get(
+  "/",
+  verifyJWT,
+  getAllProjects
+)
 
 /*
 |--------------------------------------------------------------------------
-| Update Project
+| Single Project Routes
 |--------------------------------------------------------------------------
 |
-| PATCH /api/v1/projects/:projectId
+| GET    /:projectId
+| PATCH  /:projectId
+| DELETE /:projectId
 |
-| Updates project details
+| Protected Project Access Routes
 |
 */
-router.patch("/:projectId", verifyJWT, updateProject)
-/*
-|--------------------------------------------------------------------------
-| Delete Project
-|--------------------------------------------------------------------------
-|
-| DELETE /api/v1/projects/:projectId
-|
-| Deletes a project
-|
-*/
-router.delete("/:projectId", verifyJWT, deleteProject)
+router.route("/:projectId")
+
+  .get(
+    verifyJWT,
+    verifyProjectAccess,
+    getProjectById
+  )
+
+  .patch(
+    verifyJWT,
+    verifyProjectAccess,
+    updateProject
+  )
+
+  .delete(
+    verifyJWT,
+    verifyProjectAccess,
+    deleteProject
+  )
 
 /*
 |--------------------------------------------------------------------------
@@ -88,10 +103,13 @@ router.delete("/:projectId", verifyJWT, deleteProject)
 |
 | POST /api/v1/projects/:projectId/members
 |
-| Adds new member to project
-|
 */
-router.post("/:projectId/members", verifyJWT, addMember)
+router.post(
+  "/:projectId/members",
+  verifyJWT,
+  verifyProjectAccess,
+  addMember
+)
 
 /*
 |--------------------------------------------------------------------------
@@ -99,12 +117,12 @@ router.post("/:projectId/members", verifyJWT, addMember)
 |--------------------------------------------------------------------------
 |
 | DELETE /api/v1/projects/:projectId/members/:memberId
-|
-| Removes member from project
-|
 */
-router.delete("/:projectId/members/:memberId", verifyJWT, removeMember)
+router.delete(
+  "/:projectId/members/:memberId",
+  verifyJWT,
+  verifyProjectAccess,
+  removeMember
+)
 
 export default router
-
-
