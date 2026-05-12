@@ -26,26 +26,50 @@ export const createProject = async ({
   | everything rolls back
   |
   */
+  if(!ownerId){
+    throw new ApiError(400, "Owner id is required")
+  }
     const result = await prisma.$transaction(async (tx) => {
         //1. create project
-        const project = await tx.project.create({
+        const newProject = await tx.project.create({
             data: {
                 name,
                 description,
                 ownerId
             },
         })
-        //2. add creator as member
+        //add creator as member
         await tx.projectMember.create({
             data: {
                 userId: ownerId,
-                projectId: project.id,
+                projectId: newProject.id,
                 role: "PROJECT_ADMIN"
             },
         })
-        return project
+        return newProject
     })
-    return result;
+    //fetch complete project details with members and tasks
+    const completeProject = await prisma.project.findUnique({
+        where: {
+            id: result.id,
+        },
+        include: {
+            members: {
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            username: true,
+                            fullname: true,
+                            email: true,
+                        },
+                    },
+                },
+            },
+            tasks: true
+        }
+    })
+    return completeProject;
 }
 
 /*
