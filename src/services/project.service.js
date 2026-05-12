@@ -81,3 +81,39 @@ export const getAllProjects = async (userId) => {
     return projects;
 }
 
+/*
+|--------------------------------------------------------------------------
+| Get Project By Id
+|--------------------------------------------------------------------------
+*/
+export const getProjectById = async (projectId) => {
+
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+
+    include: {
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              fullname: true,
+              email: true,
+            },
+          },
+        },
+      },
+
+      tasks: true,
+    },
+  })
+
+  if (!project) {
+    throw new ApiError(404, "Project not found")
+  }
+
+  return project
+}
