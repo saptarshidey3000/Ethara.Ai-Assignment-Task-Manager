@@ -47,3 +47,37 @@ export const createProject = async ({
     })
     return result;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Get All Projects
+|--------------------------------------------------------------------------
+|
+| Returns all projects where user is member
+|
+*/
+export const getAllProjects = async (userId) => {
+    const projects = await prisma.project.findMany({
+        where: {
+            members: {
+                some: {
+                    userId ,
+                }
+            }
+        },  
+        include: {
+            members: {
+                select: {
+                    userId: true,
+                    role: true,
+                }
+            }
+        },
+        orderBy:{
+            createdAt: "desc"
+        }
+
+    })
+    return projects;
+}
+
