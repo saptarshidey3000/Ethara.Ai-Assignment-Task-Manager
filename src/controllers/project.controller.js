@@ -83,7 +83,13 @@ const addMemberToProject = asyncHandler(async (req, res) => {
 });
 //7. remove member from project
 const removeMemberFromProject = asyncHandler(async (req, res) => {
-
+      //get request data
+      const { projectId , memberId } = req.params
+      //call service to remove member
+        await projectService.removeMemberFromProject({
+        projectId,
+        memberId,
+      })
   return res.status(200).json(
     new ApiResponse(
       200,
