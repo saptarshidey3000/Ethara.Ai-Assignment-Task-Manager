@@ -60,12 +60,24 @@ const deleteProject = asyncHandler(async (req, res) => {
 });
 //6. add member to project
 const addMemberToProject = asyncHandler(async (req, res) => {
-
+      //get request data
+      const { projectId } = req.params
+      const { email} = req.body
+      //validate request data
+      if (!email || email.trim() === "") {
+        throw new ApiError(400, "Email is required")
+      }
+      //call service to add member
+      const member = await projectService.addMemberToProject({
+        projectId,
+        email,
+       
+      })
   return res.status(200).json(
     new ApiResponse(
-      200,
-      {},
-      "Add member controller"
+      201,
+      member,
+      "Member added to project successfully"
     )
   )
 });
