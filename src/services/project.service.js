@@ -238,3 +238,57 @@ export const removeMember = async ({
      return true;   
 }
 
+/*
+|--------------------------------------------------------------------------
+| Update Project Service
+|--------------------------------------------------------------------------
+|
+| Responsibilities:
+| 1. Partial update support
+| 2. Clean update payload
+| 3. Return updated project
+|
+*/
+export const updateProject = async ({
+    projectId,
+    name,
+    description,
+    userId,
+}) => {
+    //build update data object
+    const updateData = {}
+    if (name !== undefined) {
+        updateData.name = name
+    }
+    if (description !== undefined) {
+        updateData.description = description
+    }
+    if (Object.keys(updateData).length === 0) {
+        throw new ApiError(400, "No valid fields to update")
+    }
+    //update project
+    const updatedProject = await prisma.project.updateMany({
+        where: {    
+            id: projectId,
+        },
+        data: updateData,
+        include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullname: true,
+                username: true,
+                email: true,
+              },
+            },
+          },
+        },
+
+        tasks: true,
+      }, 
+    })
+    return updatedProject;
+}
+
