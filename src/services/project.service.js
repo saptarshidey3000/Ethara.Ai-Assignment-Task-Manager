@@ -196,3 +196,45 @@ export const addMember = async ({
     })
     return member
 }
+
+/*
+|--------------------------------------------------------------------------
+| Remove Member Service
+|--------------------------------------------------------------------------
+|
+| Responsibilities:
+| 1. Verify membership exists
+| 2. Prevent owner removal
+| 3. Delete membership
+|
+*/
+export const removeMember = async ({
+    projectId,
+    memberId,
+}) => {
+    //verify membership exists
+    const membership = await prisma.projectMember.findFirst({
+        where: {
+            projectId,
+            userId: memberId,
+        } ,
+        include: {
+            project: true,
+        },
+    })
+    if (!membership) {
+        throw new ApiError(404, "Membership not found")
+    }
+    //prevent owner removal
+    if (membership.project.ownerId === memberId) {
+        throw new ApiError(400, "Cannot remove project owner")
+    }
+    //delete membership
+    await prisma.projectMember.delete({
+        where: {
+            id: membership.id,
+        }
+    })
+     return true;   
+}
+
