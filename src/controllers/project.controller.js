@@ -38,12 +38,25 @@ const getProjectById = asyncHandler(async (req, res) => {
 });
 //4. update project
 const updateProject = asyncHandler(async (req, res) => {
-
+  //GET request data
+  const { projectId } = req.params
+  const { name, description } = req.body
+  //validate request data
+  if (name && name.trim() === "") {
+    throw new ApiError(400, "Project name cannot be empty")
+  }
+  //call service to update project
+  const updatedProject = await projectService.updateProject({
+    projectId,  
+    name,
+    description,
+    userId: req.user.id
+  })
   return res.status(200).json(
     new ApiResponse(
       200,
-      {},
-      "Update project controller"
+      updatedProject,
+      "Project updated successfully"
     )
   )
 });
@@ -54,7 +67,7 @@ const deleteProject = asyncHandler(async (req, res) => {
     new ApiResponse(
       200,
       {},
-      "Delete project controller"
+      "Project deleted successfully"
     )
   )
 });
