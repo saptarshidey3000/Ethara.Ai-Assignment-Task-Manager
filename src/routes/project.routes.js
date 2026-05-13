@@ -1,7 +1,7 @@
 import { Router } from "express"
 
 // middlewares
-import { verifyJWT } from "../middlewares/auth.middleware.js"
+import verifyJWT  from "../middlewares/auth.middleware.js"
 
 import {
   verifyProjectAccess,
@@ -15,8 +15,8 @@ import {
   getProjectById,
   updateProject,
   deleteProject,
-  addMember,
-  removeMember,
+  addMemberToProject,
+  removeMemberFromProject,
 } from "../controllers/project.controller.js"
 
 const router = Router()
@@ -115,7 +115,7 @@ router.post(
   verifyJWT,
   verifyProjectAccess,
   verifyProjectAdmin,
-  addMember
+  addMemberToProject
 )
 
 /*
@@ -133,7 +133,7 @@ router.delete(
   verifyJWT,
   verifyProjectAccess,
   verifyProjectAdmin,
-  removeMember
+  removeMemberFromProject
 )
 
 export default router
