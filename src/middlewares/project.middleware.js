@@ -40,3 +40,28 @@ export const verifyProjectAccess = asyncHandler(async (req, res, next) => {
     req.projectMember = membership
     next()
 })
+
+//verify project admin : checks if user is admin of the project
+export const verifyProjectAdmin = asyncHandler(async (req, res, next) => {
+ if (!req.projectMember) {
+    throw new ApiError(
+      403,
+      "Project membership not found"
+    )
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Admin Role Check
+  |--------------------------------------------------------------------------
+  */
+
+  if (req.projectMember.role !== "PROJECT_ADMIN") {
+    throw new ApiError(
+      403,
+      "Admin access required"
+    )
+  }
+
+  next()
+})
