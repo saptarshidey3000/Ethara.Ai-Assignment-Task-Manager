@@ -5,6 +5,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js"
 
 import {
   verifyProjectAccess,
+  verifyProjectAdmin,
 } from "../middlewares/project.middleware.js"
 
 // controllers
@@ -73,26 +74,29 @@ router.get(
 | PATCH  /:projectId
 | DELETE /:projectId
 |
-| Protected Project Access Routes
-|
 */
 router.route("/:projectId")
 
+  // get single project
   .get(
     verifyJWT,
     verifyProjectAccess,
     getProjectById
   )
 
+  // update project (admin only)
   .patch(
     verifyJWT,
     verifyProjectAccess,
+    verifyProjectAdmin,
     updateProject
   )
 
+  // delete project (admin only)
   .delete(
     verifyJWT,
     verifyProjectAccess,
+    verifyProjectAdmin,
     deleteProject
   )
 
@@ -103,11 +107,14 @@ router.route("/:projectId")
 |
 | POST /api/v1/projects/:projectId/members
 |
+| Admin Only
+|
 */
 router.post(
   "/:projectId/members",
   verifyJWT,
   verifyProjectAccess,
+  verifyProjectAdmin,
   addMember
 )
 
@@ -117,11 +124,15 @@ router.post(
 |--------------------------------------------------------------------------
 |
 | DELETE /api/v1/projects/:projectId/members/:memberId
+|
+| Admin Only
+|
 */
 router.delete(
   "/:projectId/members/:memberId",
   verifyJWT,
   verifyProjectAccess,
+  verifyProjectAdmin,
   removeMember
 )
 
