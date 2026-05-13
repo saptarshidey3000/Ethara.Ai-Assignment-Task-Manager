@@ -141,3 +141,58 @@ export const getProjectById = async (projectId) => {
 
   return project
 }
+
+/*
+|--------------------------------------------------------------------------
+| Add Member Service
+|--------------------------------------------------------------------------
+|
+| Responsibilities:
+| 1. Verify user exists
+| 2. Prevent duplicate membership
+| 3. Create membership
+|
+*/
+export const addMember = async ({
+    projectId,
+    email,
+}) => {
+    //verify user exists
+    const user = await prisma.user.findUnique({
+        where: {
+            email,
+        }
+    })
+    if (!user) {
+        throw new ApiError(404, "User not found")
+    }
+    //prevent duplicate membership
+    const existingMembership = await prisma.projectMember.findFirst({
+        where: {
+            projectId,
+            userId: user.id,
+        }
+    })
+    if (existingMembership) {
+        throw new ApiError(400, "User is already a member of the project")
+    }
+    //create membership
+    const member = await prisma.projectMember.create({
+        data: {
+            projectId,
+            userId: user.id,
+            role: "PROJECT_MEMBER"
+        } ,
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    username: true,
+                    fullname: true,
+                    email: true,
+                }
+            }
+        }
+    })
+    return member
+}
