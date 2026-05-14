@@ -24,7 +24,23 @@ const createProject = asyncHandler(async (req, res) => {
 });
 //2. get all projects
 const getAllProjects = asyncHandler(async (req, res) => {
-  const projects = await projectService.getAllProjects(req.user.id)
+  //query parameters
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.query
+  //call service to get projects
+  const projects = await projectService.getAllProjects({
+    userId: req.user.id,
+    page: parseInt(page),
+    limit: parseInt(limit),
+    search,
+    sortBy,
+    sortOrder,
+  })
   res.status(200).json(new ApiResponse(true, "Projects retrieved successfully", projects))
 });
 //3. get project by id
