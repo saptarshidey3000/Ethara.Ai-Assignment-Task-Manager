@@ -6,6 +6,7 @@ import verifyJWT  from "../middlewares/auth.middleware.js"
 import {
   verifyProjectAccess,
   verifyProjectAdmin,
+  verifyProjectOwner,
 } from "../middlewares/project.middleware.js"
 
 // controllers
@@ -96,7 +97,7 @@ router.route("/:projectId")
   .delete(
     verifyJWT,
     verifyProjectAccess,
-    verifyProjectAdmin,
+    verifyProjectOwner,
     deleteProject
   )
 
