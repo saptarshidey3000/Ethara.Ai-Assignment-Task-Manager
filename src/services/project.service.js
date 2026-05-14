@@ -80,29 +80,74 @@ export const createProject = async ({
 | Returns all projects where user is member
 |
 */
-export const getAllProjects = async (userId) => {
+export const getAllProjects = async (
+    userId,
+    page,
+    limit,
+    search,
+    sortBy,
+    sortOrder
+) => {
+    //pagination calculations
+    const skip = (page - 1) * limit
+    //search filter
+    const searchFilter = search
+        ? {
+            OR: [
+                { name: { contains: search, mode: "insensitive" } },
+                { description: { contains: search, mode: "insensitive" } },
+            ],
+        }
+        : {}
+        //fetch projects with member filter, search, sorting, and pagination
     const projects = await prisma.project.findMany({
         where: {
             members: {
                 some: {
-                    userId ,
-                }
-            }
-        },  
+                    userId,
+                },
+            },
+            ...searchFilter,
+        },
         include: {
             members: {
                 select: {
                     userId: true,
                     role: true,
-                }
-            }
+                },
+            },
         },
+        //pagination
+        skip,
+        take: limit,
         orderBy:{
-            createdAt: "desc"
-        }
-
+            [sortBy]: sortOrder
+        },
     })
-    return projects;
+
+    //total count 
+    const totalProjects =
+     await prisma.project.count({
+        where: {
+            members: {
+                some: {
+                    userId,
+                },
+            },
+            ...searchFilter,
+        },
+    })
+    //total pages calculation
+    const totalPages = Math.ceil(totalProjects / limit)
+
+    return {
+        projects,
+        pagination: {   
+            totalProjects,
+            totalPages,
+            currentPage: page,
+        },
+    }
 }
 
 /*
