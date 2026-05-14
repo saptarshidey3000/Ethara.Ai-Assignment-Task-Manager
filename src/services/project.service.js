@@ -292,3 +292,38 @@ export const updateProject = async ({
     return updatedProject;
 }
 
+/*
+|--------------------------------------------------------------------------
+| Delete Project Service
+|--------------------------------------------------------------------------
+|
+| Responsibilities:
+| 1. Delete related memberships
+| 2. Delete related tasks
+| 3. Delete project
+| 4. Use transaction safety
+|
+*/
+export const deleteProject = async (projectId) => {
+    await prisma.$transaction(async (tx) => {
+        //delete memberships
+        await tx.projectMember.deleteMany({
+            where: {
+                projectId,
+            }
+        })
+        //delete tasks
+        await tx.task.deleteMany({
+            where: {
+                projectId,
+            }
+        })
+        //delete project
+        await tx.project.delete({
+            where: {
+                id: projectId,
+            }
+        })
+    })
+    return true;
+}
