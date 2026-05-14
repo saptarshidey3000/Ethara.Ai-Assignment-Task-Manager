@@ -65,3 +65,28 @@ export const verifyProjectAdmin = asyncHandler(async (req, res, next) => {
 
   next()
 })
+
+/*
+|--------------------------------------------------------------------------
+| Verify Project Owner Middleware
+|--------------------------------------------------------------------------
+|
+| Only project owner can perform
+| destructive operations
+|
+*/
+export const verifyProjectOwner = asyncHandler(async (req, res, next) => {
+    if (!req.projectMember) {
+        throw new ApiError(
+            403,
+            "Project membership not found"
+        )
+    }
+    if (req.projectMember.role !== "PROJECT_OWNER") {
+        throw new ApiError(
+            403,
+            "Project owner access required"
+        )
+    }
+    next()
+})
