@@ -62,7 +62,9 @@ const updateProject = asyncHandler(async (req, res) => {
 });
 //5. delete project
 const deleteProject = asyncHandler(async (req, res) => {
-
+  const { projectId } = req.params
+  await projectService.deleteProject(projectId, req.user.id)
+  
   return res.status(200).json(
     new ApiResponse(
       200,
