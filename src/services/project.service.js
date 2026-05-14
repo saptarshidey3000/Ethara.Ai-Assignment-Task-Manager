@@ -108,6 +108,10 @@ export const getAllProjects = async (userId) => {
 /*
 |--------------------------------------------------------------------------
 | Get Project By Id
+| - project details
+| - members
+| - tasks
+| - analytics
 |--------------------------------------------------------------------------
 */
 export const getProjectById = async (projectId) => {
@@ -138,8 +142,24 @@ export const getProjectById = async (projectId) => {
   if (!project) {
     throw new ApiError(404, "Project not found")
   }
+  //Analytics
+  const totalMembers = project.members.length
+  const totalTasks = project.tasks.length
+  //task status analytics
+  const completedTasks = project.tasks.filter(
+    (task) => task.status === "COMPLETED").length
+    const pendingTasks = project.tasks.filter(
+        (task) => task.status === "PENDING").length
 
-  return project
+  return {
+    ...project, 
+    analytics: {
+        totalMembers,
+        totalTasks,
+        completedTasks,
+        pendingTasks,
+    }
+  }
 }
 
 /*
